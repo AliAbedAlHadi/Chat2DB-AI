@@ -1,0 +1,42 @@
+[
+  {
+    "role": "user",
+    "content": "list all companies"
+  },
+  {
+    "role": "assistant",
+    "content": "USE A;\nGO\nSELECT * FROM I;"
+  },
+  {
+    "role": "user",
+    "content": "list all emplyee with their company"
+  },
+  {
+    "role": "assistant",
+    "content": "USE A;\nGO\nSELECT E.*, I.* FROM E INNER JOIN EI ON E.EID = EI.EIID INNER JOIN I ON EI.IID = I.IID;"
+  },
+  {
+    "role": "user",
+    "content": "only names"
+  },
+  {
+    "role": "assistant",
+    "content": "USE A;\nGO\nSELECT E.EN, I.EN FROM E INNER JOIN EI ON E.EID = EI.EIID INNER JOIN I ON EI.IID = I.IID;"
+  },
+  {
+    "role": "user",
+    "content": "list all stringResources"
+  },
+  {
+    "role": "assistant",
+    "content": "USE GoPosifyDB;\nGO\nSELECT * FROM StringResources;"
+  },
+  {
+    "role": "user",
+    "content": "list all employee with the titlt of their department "
+  },
+  {
+    "role": "assistant",
+    "content": "USE GoPosifyDB;\nGO\nSELECT E.*, D.Title AS DepartmentTitle FROM Employees E INNER JOIN Departments D ON E.DepartmentId = D.Id;"
+  }
+]
