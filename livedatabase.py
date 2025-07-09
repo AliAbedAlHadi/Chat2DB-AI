@@ -23,7 +23,8 @@ def extract_schema_for_database(conn, db_name):
                 c.COLUMN_NAME, 
                 c.DATA_TYPE, 
                 c.IS_NULLABLE,
-                CASE WHEN k.COLUMN_NAME IS NOT NULL THEN 1 ELSE 0 END AS IS_PRIMARY_KEY
+                CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 1 ELSE 0 END AS IS_PRIMARY_KEY,
+                CASE WHEN fk.COLUMN_NAME IS NOT NULL THEN 1 ELSE 0 END AS IS_FOREIGN_KEY
             FROM INFORMATION_SCHEMA.COLUMNS c
             LEFT JOIN (
                 SELECT COLUMN_NAME
@@ -34,14 +35,24 @@ def extract_schema_for_database(conn, db_name):
                     tc.TABLE_NAME = '{table_name}'
                     AND tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
                     AND tc.TABLE_SCHEMA = '{schema_name}'
-            ) k ON c.COLUMN_NAME = k.COLUMN_NAME
+            ) pk ON c.COLUMN_NAME = pk.COLUMN_NAME
+            LEFT JOIN (
+                SELECT kcu.COLUMN_NAME
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+                JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+                  ON kcu.CONSTRAINT_NAME = tc.CONSTRAINT_NAME
+                WHERE 
+                    tc.TABLE_NAME = '{table_name}'
+                    AND tc.CONSTRAINT_TYPE = 'FOREIGN KEY'
+                    AND tc.TABLE_SCHEMA = '{schema_name}'
+            ) fk ON c.COLUMN_NAME = fk.COLUMN_NAME
             WHERE c.TABLE_NAME = '{table_name}' AND c.TABLE_SCHEMA = '{schema_name}'
             ORDER BY c.ORDINAL_POSITION
         """)
         columns = cursor.fetchall()
 
         formatted_columns = [
-            [col[0], col[1], col[2], bool(col[3])] for col in columns
+            [col[0], col[1], col[2], bool(col[3]), bool(col[4])] for col in columns
         ]
 
         schema.append({
